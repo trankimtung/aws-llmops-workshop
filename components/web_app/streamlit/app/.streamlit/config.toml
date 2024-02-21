@@ -1,0 +1,6 @@
+[theme] # You have to add this line
+
+base = "light"
+
+primaryColor = '#FF8C02' # Bright Orange
+

@@ -1,0 +1,2 @@
+#!/bin/sh
+aws cloudformation create-stack --stack-name LLMOps-Workshop --capabilities CAPABILITY_IAM --template-body file://getting-started.yml --parameters ParameterKey=EnableOpenSearch,ParameterValue=true
