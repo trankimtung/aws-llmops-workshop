@@ -91,3 +91,5 @@ cdk destroy
 ## Summary
 
 In this segmesectionnt, you manually executed the integration and deployment phases of LLMOps by conducting unit and integration testing on both the infrastructure and generative AI application code. In the subsequent section, you'll encapsulate the solution within a CI/CD Pipeline to automate these processes.
+
+[Click here to proceed to the next section.](/.docs/part-1/30-create-a-cicd-llmops-pipeline.md)

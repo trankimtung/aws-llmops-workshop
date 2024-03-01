@@ -213,3 +213,5 @@ git push ccm main
 ## Summary
 
 In this section, you've completed the integration of your solution into a CI/CD Pipeline, deployed the updated solution, and tested it in both QA and Prod environments. Next, you'll enhance the pipeline by introducing a continuous tuning stage, enabling automated model tuning and evaluation. If the model demonstrates improved performance, it can be smoothly deployed into production.
+
+[Click here to proceed to the next section.](/.docs/part-2/40-continous-tuning-using-fmops.md)

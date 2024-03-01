@@ -1,6 +1,6 @@
 ## Getting started
 
-To get started, ensure you have an AWS account with AdministratorAccess. If you don't already have one, please create an AWS account.
+Before you begin, you'll need to set up your development environment and deploy the necessary AWS resources that will be utilized later in the workshop. This section will guide you through that process.
 
 ## Pre-requisites
 
@@ -10,12 +10,17 @@ To get started, ensure you have an AWS account with AdministratorAccess. If you 
 - Visual Studio Code
 - Docker
 
-> __NOTE:__ It is recommended that you attempt the workshop in a development container, using the provided configuration.
-
 
 ## Setup your environment
 
-1. Ensure that you have the necessary dependencies installed. Skip this step if you are using the provided development container.
+
+> __NOTE:__ It's recommended that you attempt the workshop in a development container, using the provided configuration. 
+> 
+> Follow these links to learn more about [Development Container](https://containers.dev/) and [Developing inside a container with Visual Studio Code](https://code.visualstudio.com/docs/devcontainers/containers).
+>
+> Skip this step if you are using development container.
+
+1. Ensure that you have the necessary dependencies installed.
     - Docker
     - Python 3.11
     - Npm
@@ -40,18 +45,23 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-5. Take a look at the configuration template file `constants.py` at the root of the repository. We will use this file to customize the deployment of the workshop. You may want to update these 2 parameters, or leave them with the default values.
-
-- `WORKLOAD_NAME`: Provide a name for the work load, e.g. `LLMOps-Workshop`
-- `REGION`: Provide the name of the AWS Region you wish to use. This should be an AWS Region that Bedrock supports. The default value is `us-east-1`
-
 
 ## Setting up your AWS account
 
+Make sure you have your AWS credentials properly configured in your terminal.
 
-### 1. Deploy necessary AWS resouces
+If you have an  AWS access key, export it as environment variables by running the following commands in your terminal.
 
-Click below link to launch the `Getting Started` CloudFormation stack.
+```shell
+export AWS_ACCESS_KEY_ID=your_access_key
+export AWS_SECRET_ACCESS_KEY=your_secret_key
+```
+
+### Deploy necessary AWS resouces
+
+Choose an AWS Region to deploy resouces into. `us-east-1` is recommended for this workshop.
+
+Click below link to launch the `LLMOps-Workshop` CloudFormation stack into the corresponding AWS Region.
 
 Region|Launch URL
 :--|:--
@@ -65,7 +75,7 @@ Tick the box to acknowledge that CloudFormation may generate IAM resources in yo
 
 ![](img/cf-iam-capability.png)
 
-Alternatively, You can run the following command in your terminal. Before executing this command, ensure your AWS credentials are properly configured.
+Alternatively, you can run the following command in your terminal. Before executing this command, ensure your AWS credentials are properly configured.
 
 ```shell
 aws cloudformation create-stack --stack-name LLMOps-Workshop --capabilities CAPABILITY_IAM --template-body file://getting-started.yml
@@ -76,7 +86,7 @@ aws cloudformation create-stack --stack-name LLMOps-Workshop --capabilities CAPA
 Once the status changes to `CREATE_COMPLETE`, you'll know that the stack has been successfully launched.
 
 
-### 2. Request access to Amazon Bedrock foundation models
+### Request access to Amazon Bedrock foundation models
 
 1. In the Management Console, search for `Amazon Bedrock`, and using the left-hand navigation panel, scroll down to select `Model Access`.
 
@@ -97,6 +107,9 @@ Once the status changes to `CREATE_COMPLETE`, you'll know that the stack has bee
 6. Click the `Save changes` button to submit the license approval process.
 
 
+
 ## Summary
 
 In this section, you have set up your development environment and deploy the AWS resources necessary for the workshop into your AWS accounts. These resources include a SageMaker Domain, an OpenSearch cluster, IAM roles, and more. You also submitted a request to gain access to the essential Amazon Bedrock foundation models.
+
+[Click here to proceed to the next section.](/.docs/part-1/10-writing-application-and-infrastructure.md)

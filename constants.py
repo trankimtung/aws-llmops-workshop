@@ -1,5 +1,5 @@
 WORKLOAD_NAME = "LLMOps-Workshop"
-REGION = "us-east-1"
+REGION = "us-east-1" # must support Amazon Bedrock
 
 QA_ENV_NAME = "QA"
 PROD_ENV_NAME = "PROD"

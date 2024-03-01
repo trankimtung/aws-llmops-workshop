@@ -70,8 +70,8 @@ Next, you will save the Text API URL as a CloudFormation Output parameter. This 
 Next, you'll create the Image API along with its supporting Lambda function by utilizing the pre-defined `ImageAPI` component. Upon accessing the `Image Generation` tab of the generative AI web application, you'll observe that this component operates similarly to the `TextAPI` component. The API will receive your prompt for generating an image, format it within the prompt template, and then forward the prompt to the model hosted on Amazon Bedrock.
 
 ```python
-image_api = ImageApi(self, "ImageAPI")
-image_api.image_handler.add_environment(key="IMAGE_MODEL_ID", value=context.get("bedrock-image-model-id"))
+        image_api = ImageApi(self, "ImageAPI")
+        image_api.image_handler.add_environment(key="IMAGE_MODEL_ID", value=context.get("bedrock-image-model-id"))
 ```
 
 ![](../img/text-api-and-image-api.png)
@@ -132,3 +132,5 @@ Lastly, you'll save the DNS URL of the web application as a CloudFormation Outpu
 ## Summary
 
 In this section, you've constructed a CDK stack responsible for deploying the infrastructure needed for the Web Application, Text API, and Image API. Moving forward, you'll manually conduct integration testing to showcase what will eventually be automated by the CI/CD/CT pipeline.
+
+[Click here to proceed to the next section.](/.docs/part-1/20-manual-unit-and-integration-test.md)

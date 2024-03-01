@@ -1,4 +1,4 @@
-# Accelerate Generative AI applications operations with LLMOps
+# Accelerate Generative AI application operations with LLMOps
 
 
 ## Introduction
@@ -33,10 +33,6 @@ By the end of this workshop, participants will have a good foundation for operat
 
 **Foundation Model Operations (FMOps)** takes the MLOps methodology and adds the additional skills, processes, and technologies needed to operationalize Generative AI models.
 
-## Pre-requisites
+## Start the workshop
 
-- AWS account with AdminstratorAccess
-- Computer with internet connection
-- A modern web browser
-- Visual Studio Code
-- Docker
+Follow the instructions to [start the workshop](.docs/00-getting-started.md).

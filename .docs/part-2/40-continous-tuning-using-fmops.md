@@ -328,3 +328,5 @@ Once the model version has been deemed suitable for production, it can be manual
 ## Summary
 
 In this section, you added a continuous tuning stage to the CodePipeline, automatically fine-tuned your model, and saw how the CI/CD/CT pipeline automatically updated and deployed the generative AI application to use the new model. In the next section, you will deploy a way to add context to your prompts and query data without having to fine-tune a model.
+
+[Click here to proceed to the next section.](/.docs/part-2/50-retrieval-augmented-generation.md)

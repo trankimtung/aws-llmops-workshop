@@ -196,3 +196,5 @@ To see the RAG technique in action, use the following steps:
 ## Summary
 
 In this section, you integrated Retrieval Augmented Generation (RAG) into your infrastructure by preprocessing a text file, segmenting it into chunks, converting these segments into embeddings, and storing them in a vector database. Subsequently, you observed how your model could leverage this enriched dataset to provide more accurate responses to queries related to the topic.
+
+[Click here to proceed to the next section.](/.docs/part-2/60-clean-up.md)

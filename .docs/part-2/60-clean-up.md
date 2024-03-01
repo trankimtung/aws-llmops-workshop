@@ -3,7 +3,9 @@
 
 ## Delete the CloudFormation Stacks
 
-Congratulations, you have finished the workshop! Now you will clean up the resources created in this workshop.
+**Congratulations, you have finished the workshop!**
+
+Now you will clean up the resources created in this workshop.
 
 1. Search `CloudFormation` in the AWS Console.
 
