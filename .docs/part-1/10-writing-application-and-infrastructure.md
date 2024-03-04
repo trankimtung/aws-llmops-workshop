@@ -47,7 +47,7 @@ Instantiate the Text API by employing the pre-defined `TextAPI` component. Subse
         text_api.text_handler.add_environment(key="EMBEDDING_MODEL_ID", value=context.get("bedrock-embedding-model-id"))
         text_api.text_handler.add_environment(
             key="TEXT_MODEL_ID",
-            valu  e=InfrastructureStack._get_model(
+            value=InfrastructureStack._get_model(
                 parameter_name=model_parameter_name,
                 region=constants.REGION,
                 context=context

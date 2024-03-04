@@ -52,7 +52,7 @@ In this section, you will add the continuous tuning stage to the `ToolChainStack
 Retrieve the pipeline variables from the toolchain context. This loads the model customization values, such as Epochs, Batch size, Learning rate, and Learning warmup steps. These parameters are used to tweak the fine-tuning process for the custom model.
 
 ```python
-context = self.node.try_get_context("toolchain-context")
+        context = self.node.try_get_context("toolchain-context")
 ```
 
 Create the S3 buckets, which will trigger the fine-tuning model customization process when a tuning dataset is uploaded.
