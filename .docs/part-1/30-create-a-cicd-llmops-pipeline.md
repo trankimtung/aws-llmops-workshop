@@ -97,11 +97,11 @@ Create the CDK Pipeline structure. This defines what actions will occur during t
             ),
             docker_enabled_for_synth=True
         )
-        ```
+```
 
-        Use the `_add_stage()` method to add the QA Stage to the pipeline. This stage is responsible for deploying the solution within a QA environment, where functional testing of the solution, simulating production-like conditions, is automated.
+Use the `_add_stage()` method to add the QA Stage to the pipeline. This stage is responsible for deploying the solution within a QA environment, where functional testing of the solution, simulating production-like conditions, is automated.
 
-        ```shell
+```shell
         ToolChainStack._add_stage(
             pipeline=pipeline,
             stage_name=constants.QA_ENV_NAME,
@@ -109,11 +109,11 @@ Create the CDK Pipeline structure. This defines what actions will occur during t
             stage_region=self.region,
             model_parameter_name="CustomModelName"
         )
-        ```
+```
 
-        Use the `_add_stage()` method to add Production Stage to the pipeline
+Use the `_add_stage()` method to add Production Stage to the pipeline
 
-        ```python
+```python
         ToolChainStack._add_stage(
             pipeline=pipeline,
             stage_name=constants.PROD_ENV_NAME,
