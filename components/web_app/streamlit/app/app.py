@@ -57,21 +57,21 @@ if "db" not in st.session_state:
 
 # Bedrock standard request
 def zero_shot(query: str) -> str:
-    with st.spinner("Wait for it ..."):
+    with st.spinner("Thinking ..."):
         data = {"question": query}
         response = requests.post(text_api, headers=headers, json=data, timeout=120)
         if response.status_code != HTTP_OK:
             st.session_state["zero"] = response.text
-        
+
         else:
             st.session_state["zero"] = response.json()["response"]
 
 # RAG request
 def use_db(query: str) -> str:
-    with st.spinner("Wait for it ..."):
+    with st.spinner("Thinking ..."):
         data = {"question": query}
         if not rag_api:
-            st.session_state["db"] = ":red[Database enabled Retrieval Augmented Generation (RAG) has not been enabled! Please contact your system administrator]"
+            st.session_state["db"] = ":red[Retrieval Augmented Generation (RAG) has not been enabled!]"
             return
         
         response = requests.post(rag_api, headers=headers, json=data, timeout=120)
@@ -81,7 +81,7 @@ def use_db(query: str) -> str:
         else:
             st.session_state["db"] = response.json()["response"]
 
-st.set_page_config(layout="wide", page_icon=":robot:", page_title="Demo Web App")
+st.set_page_config(layout="wide", page_icon=":robot:", page_title="Generative AI Demo")
 st.header("Generative AI Demo Application - Image and Text Generation")
 st.markdown(
     """
@@ -97,24 +97,24 @@ st.markdown(
         }
     </style>
     """, unsafe_allow_html=True)
-st.sidebar.image("./img/AWS_logo.png", width=100)
+st.sidebar.image("./img/logo.png", width=100)
 st.sidebar.divider()
 
 with st.sidebar:
     st.markdown('''
-        This demo web application is designed to showcase two possible use cases to assist with Game Asset development, namely __Image Asset__, and __Script Asset__ generation.  
+        This demo web application is designed to showcase two possible use cases for Generative AI: __Image Generation__ and __Questions & Answers__.  
         
-        To create image assets, click on the :orange[Image Generation] tab. In the text space provided, enter a description of the image to generate.
-        Then, from the drop-down, select the style preset for the generated image.
+        To generate images, go to the __Image Generation__ tab. Enter a description of the image you want to generate in the text area. 
+        Then, select the style preset for the generated image from the drop-down menu.
         Click the `Generate image` button to create the image.  
         
-        To create script assets, click the :orange[Text Generation] tab. Enter your question in the text space provided.
-        Click the checkbox, to use additional context from the RAG database, and click the `Submit` button. 
+        To ask questions, go to the __Questions & Answers__ tab. Enter your question in the text area.
+        Check the box to enable Retrieval Augmented Generation, and click the `Submit` button. 
     ''')
 
-tab1, tab2 = st.tabs(["Image Generation", "Text Generation"])
+tab1, tab2 = st.tabs(["Image Generation", "Questions & Answers"])
 with tab1:
-    st.subheader("Generate Image Assets")
+    st.subheader("Generate Image")
     prompt = st.text_area("Input Image description:")
     style = st.selectbox(label="Select the image style preset:", options=style_presets)
 
@@ -123,7 +123,7 @@ with tab1:
             st.error("Please enter a valid prompt!")
 
         else:
-            with st.spinner("Wait for it ..."):
+            with st.spinner("Generating something nice ..."):
                 try:
                     response = requests.post(image_api, json={"prompt": prompt, "style": style}, timeout=180)
                     response_body = response.json()["response"]
@@ -148,7 +148,7 @@ with tab2:
     with form:
         prompt= st.text_area("Enter your question here:", height=100)
         left, right = st.columns(2)
-        db = st.checkbox("Use Database for Additional Context")
+        db = st.checkbox("Use database for additional context (RAG)")
         submit_button = form.form_submit_button("Submit")
         if submit_button:
             if prompt != "" and not db:
