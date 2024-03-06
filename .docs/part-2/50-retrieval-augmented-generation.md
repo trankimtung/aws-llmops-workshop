@@ -12,7 +12,9 @@ The process is illustrated below:
 
 ![](../img/rag-data-process.png)
 
-In this section, you will add the RAG Components to the InfrastructureStack, which will redeploy the solution with an Amazon S3 bucket, Amazon OpenSearch Service Cluster, and an AWS Lambda Function. You will then take the open-source ebook, [Treasure Island by Robert Louis Stevenson](https://www.gutenberg.org/ebooks/120), break the text into composable passages, capture the vectorized representation of each passage using the Titan embeddings model, and then hydrate the Amazon OpenSearch Service database index with these embeddings. Finally, you will use the web application to prompt the Bedrock model with Treasure Island specific questions, and see how the model augments it's response with this context. By the end of this section, your architecture will look as follows:
+In this section, you will define additional components necessary to support RAG by updating the `InfrastructureStack`. Those components include an S3 bucket, an OpenSearch Service Domain, and a Lambda Function. You will then take a text file, break it into composable chunks, capture the vectorized representation of each chunk using Amazon Titan Embeddings model, and then hydrate the Amazon OpenSearch Service database index with these embeddings. Finally, you will use the web application to prompt the foundation model with context specific questions, and see how the model augments it's response with this context. 
+
+By the end of this section, your architecture will look as follows:
 
 ![](../img/architecture_full.png)
 
@@ -20,9 +22,11 @@ In this section, you will add the RAG Components to the InfrastructureStack, whi
 ## Steps
 
 
-### Reset model
+### Configure the application to use a foundation model
 
-In the previous section, the toolchain was configured to use the fine-tuned custom model. Since RAG is an alternate methodology to fine-tuning, the following steps will reset the model parameter to use the foundation model:
+In the previous section, the application was configured to use a fine-tuned custom model. Since RAG is an alternate methodology to fine-tuning, we will reset the application to use a foundation model. To do this, you will update the AWS Systems Manager Parameter Store `CustomModelName` parameter value to `PLACEHOLDER`.
+
+Follow the steps below to update the model configuration:
 
 1. In your terminal, run the AWS CLI command to update the AWS Systems Manager Parameter Store parameter value to `PLACEHOLDER`.
 
@@ -36,10 +40,10 @@ aws ssm put-parameter --name CustomModelName --value PLACEHOLDER --overwrite
 aws ssm get-parameter --name CustomModelName --query "Parameter.Value"
 ```
 
+> Note: The foundation model used by the application is defined in the `cdk.json` file in the root of the workshop repository.
 
-### Enable RAG
 
-Since enabling RAG is solution constant, the following steps will configure RAG for the workload:
+### Enable RAG in the `constants.py` file
 
 1. Open the `constants.py` file in the root folder of the workshop repository.
 
@@ -60,29 +64,7 @@ Since enabling RAG is solution constant, the following steps will configure RAG 
 
 1. Open `stacks/infrastructure.py`.
 
-2. Delete the code immediately under the following comment
-
-```python
-# Create RAG tuning resource, IF it's enabled as a solution constant
-```
-
-3. Delete the following comments, as well as the code that goes with it:
-
-```python
-# Create the streamlit application. This is the application where users will prompt the LLM
-```
-
-4. Delete the following comments and the code that goes with it:
-
-```python
-# Expose the DNS URL for the streamlit web application
-```
-
-5. Now, copy the following code and paste it under:
-
-```python
-# Create RAG tuning resource, IF it's enabled as a solution constant
-```
+2. Replace the code immediately under `Create RAG tuning resource, IF it's enabled as a solution constant` with the following:
 
 ```python
         # Defines the S3 Bucket which will trigger the hydration process when data is uploaded.
@@ -90,7 +72,7 @@ Since enabling RAG is solution constant, the following steps will configure RAG 
         rag_bucket = _s3.Bucket(
             self,
             "RagDataBucket",
-            bucket_name=f"{self.stack_name.lower()}-{cdk.Aws.REGION}-{cdk.Aws.ACCOUNT_ID}",
+            bucket_name=f"{self.stack_name.lower()}-rag-{cdk.Aws.REGION}-{cdk.Aws.ACCOUNT_ID}",
             removal_policy=cdk.RemovalPolicy.DESTROY,
             auto_delete_objects=True,
             versioned=True
@@ -100,14 +82,6 @@ Since enabling RAG is solution constant, the following steps will configure RAG 
         rag_api = RagApi(self, "RagAPI")
         rag_api.rag_handler.add_environment(key="TEXT_MODEL_ID", value=context.get("bedrock-text-model-id"))
         rag_api.rag_handler.add_environment(key="EMBEDDING_MODEL_ID", value=context.get("bedrock-embedding-model-id"))
-
-        # Expose RAG API endpoint for cross-stack, and external app reference. This ensures you are using the correct model and incorporating RAG for text generation within your application.
-        _ssm.StringParameter(
-            self,
-            "RagEndpointParameter",
-            parameter_name=f"{self.stack_name}-RagEndpointParameter",
-            string_value=rag_api.rag_apigw.url
-        )
 
         # Add the OpenSearch Vector Store. This defines the hydration process to load data into the OpenSearch Service Cluster.
         vector_store = VectorStore(self, "VectorStore", data_bucket=rag_bucket)
@@ -126,8 +100,12 @@ Since enabling RAG is solution constant, the following steps will configure RAG 
             "RagApiEndpointUrl",
             value=rag_api.rag_apigw.url
         )
+```
 
-        # Create the demo Web Application with a RAG endpoint. This is the application where users will send prompts to the LLM. This component creates a streamlit application hosted on Amazon ECS Fargate. The variables specified determine where the application is hosted and the backend APIs the application should use.
+4. Replace the code under the comment `Create the streamlit application. This is the application where users will prompt the LLM` with the following code. You may notice that the only difference is the value of the `rag_endpoint` parameter:
+
+```python
+        # Create the streamlit application. This is the application where users will prompt the LLM
         web_app = WebApp(
             self,
             "StreamlitWebApp",
@@ -136,17 +114,9 @@ Since enabling RAG is solution constant, the following steps will configure RAG 
             image_endpoint=image_api.image_apigw.url,
             rag_endpoint=rag_api.rag_apigw.url
         )
-
-        # Expose the DNS URL for the streamlit web application
-        self.web_app_url = cdk.CfnOutput(
-            self,
-            "WebAppUrl",
-            value=f"http://{web_app.service.load_balancer.load_balancer_dns_name}"
-        )
 ```
 
-
-Your code from the Image API Endpoint to the `@staticmethod` should look like this:
+After all modifications, your code from the Image API Endpoint to the `@staticmethod` should look like this:
 
 ![](../img/infra-stack-with-rag.png)
 
@@ -167,34 +137,46 @@ git push ccm
 
 ### Hydrate the vector database
 
-1. After the pipeline execution has successfully completed, download, and save a local copy of the text file for [Treasure Island by Robert Louis Stevenson](https://ws-assets-prod-iad-r-pdx-f3b3f9f1a7d6a3d0.s3.us-west-2.amazonaws.com/90992473-01e8-42d6-834f-9baf866a9057/pg120.txt).
+After the CI/CD pipeline execution has successfully completed, you will start hydrating the vector database. You do that by uploading a text file to the S3 bucket created by the `InfrastructureStack` as host RAG context data. This will trigger a Lambda Function that starts a SageMaker Processing job to hydrate the OpenSearch database.
 
-2. Using the AWS Console, navigate to Amazon S3 service, and select the bucket with the following format, `<WORKLOAD NAME>-prod-<REGION>-<ACCOUNT NUMBER>`.
+The example text file can be found in `rag-data` folder in the root of the workshop repository.
 
-3. Upload the text file, by clicking on the upload button, and selecting the file you've just downloaded. This will trigger the Lambda Function that starts a SageMaker Processing job to hydrate the OpenSearch database.
+Follow the steps below to start the hydration process:
 
-4. Using the AWS console, search for, and click on the Amazon SageMaker service to open the service console. Using the navigation panel on the left-hand side, expand the `Processing` option, and then select Processing jobs. You'll see a processing job has been started. This jobs executes the process of chunking the ebook data, converting it to embeddings, and hydrating the database.
+1. Using the AWS Console, navigate to Amazon S3 service, and select the bucket with the following format, `<WORKLOAD NAME>-prod-rag-<REGION>-<ACCOUNT NUMBER>`.
 
-5. Clink on the running processing job to view its configuration. Under Monitoring, click the View logs link to see the processing logs for your job in Amazon CloudWatch. After roughly 5 minutes, the log stream becomes available, and after clicking on the log stream, you will see that each line of the log output represents the successful processing of a chunk of the text inserted into the vector store.
+3. Upload the text file, by clicking on the upload button, and selecting the example text file found in `rag-data` folder. This will trigger the Lambda Function that starts a SageMaker Processing job to hydrate the OpenSearch database.
 
-> Note: The vector store hydration will take approximately 5 minutes.
+Alternatively, you can use the AWS CLI for uploading. Run the following commands in your terminal:
+
+```shell
+export WORKLOAD=$(python -c "import constants; print(constants.WORKLOAD_NAME.lower())")
+export RAG_BUCKET=s3://$WORKLOAD-prod-rag-$AWS_REGION-$AWS_ACCOUNT_ID
+aws s3 cp ./rag-data/additional-context.txt $RAG_BUCKET/
+```
+
+4. Using the AWS console, search for, and click on the Amazon SageMaker service to open the service console. Using the navigation panel on the left-hand side, expand the `Processing` option, and then select `Processing jobs`. You'll see a processing job has been started. This jobs executes the process of chunking the ebook data, converting it to embeddings, and hydrating the database.
+
+5. Clink on the running processing job to view its configuration. Under `Monitoring`, click the `View logs` link to see the processing logs for your job in Amazon CloudWatch. After roughly 5 minutes, the log stream becomes available, and after clicking on the log stream, you will see that each line of the log output represents the successful processing of a chunk of the text inserted into the vector store.
+
+> Note: The vector database hydration process will take approximately 8 minutes.
 
 
 ### RAG in action
 
-To see the RAG technique in action, use the following steps:
+To observe the Retrieval Augmented Generation (RAG) technique in action, follow these steps:
 
-1. Use the AWS console to search for, and open the CloudFormation service console.
+1. Use the AWS console to navigate to the CloudFormation service.
 
-2. Select the `<WORKLOAD NAME>-PROD` stack and click on the Outputs tab.
+2. Select the `<WORKLOAD NAME>-PROD` stack and go to the Outputs tab.
 
-3. Click on the URL value associated with WebAppUrl to open the generative AI application.
+3. Click on the URL value associated with `WebAppUrl` to access the Generative AI application.
 
-4. Go to the Text Generation tab on the generative AI web application, and ask the model a specific question and check the `Use database for additional context` to see how the model uses RAG.
+4. In the Generative AI web application, navigate to the `Questions & Answers` tab. Ask the model a specific question and enable the `Use database for additional context` option to see how the model utilizes RAG.
 
 
 ## Summary
 
-In this section, you integrated Retrieval Augmented Generation (RAG) into your infrastructure by preprocessing a text file, segmenting it into chunks, converting these segments into embeddings, and storing them in a vector database. Subsequently, you observed how your model could leverage this enriched dataset to provide more accurate responses to queries related to the topic.
+In this section, you updated the application and infrastructure to support Retrieval Augmented Generation (RAG). You supplied additional context to the foundation model by preprocessing a text file, segmenting it into chunks, converting these chunks into embeddings, and storing them in a vector database. Subsequently, you observed how the foundation model could leverage this enriched dataset to provide more accurate responses to queries related to the topic.
 
 [Click here to proceed to the next section.](/.docs/part-2/60-clean-up.md)
