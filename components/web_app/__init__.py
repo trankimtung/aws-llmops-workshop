@@ -25,6 +25,7 @@ from aws_cdk import(
     aws_ec2 as _ec2,
     aws_ecs as _ecs,
     aws_iam as _iam,
+    aws_ecr_assets as _ecr_assets,
     aws_ecs_patterns as _patterns
 )
 from constructs import Construct
@@ -54,8 +55,8 @@ class WebApp(Construct):
             cpu=512,
             runtime_platform=_ecs.RuntimePlatform(
                 operating_system_family=_ecs.OperatingSystemFamily.LINUX,
-                cpu_architecture=_ecs.CpuArchitecture.X86_64
-            )
+                cpu_architecture=_ecs.CpuArchitecture.of(constants.ARCHITECTURE)
+            ),
         )
         definition.add_to_execution_role_policy(
             statement=_iam.PolicyStatement(
@@ -74,7 +75,8 @@ class WebApp(Construct):
         definition.add_container(
             "WebAppImage",
             image=_ecs.ContainerImage.from_asset(
-                directory=str(pathlib.Path(__file__).parent.joinpath("streamlit").resolve())
+                directory=str(pathlib.Path(__file__).parent.joinpath("streamlit").resolve()),
+                platform=_ecr_assets.Platform.LINUX_AMD64 if constants.ARCHITECTURE == "X86_64" else _ecr_assets.Platform.LINUX_ARM64
             ),
             logging=_ecs.AwsLogDriver(
                 stream_prefix="ecs-logs"
