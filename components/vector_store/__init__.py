@@ -120,7 +120,7 @@ class VectorStore(Construct):
         processing_image = _ecr_assets.DockerImageAsset(
             self,
             "ProcessingImage",
-            directory=str(pathlib.Path(__file__).parent.joinpath("image").resolve()),
+            directory=str(pathlib.Path(__file__).parent.joinpath("sagemaker_processing_image").resolve()),
             platform=_ecr_assets.Platform.LINUX_AMD64
         )
         
@@ -160,7 +160,7 @@ class VectorStore(Construct):
             self,
             "NotificationFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
-            code=_lambda.Code.from_asset(str(pathlib.Path(__file__).parent.joinpath("runtime").resolve())),
+            code=_lambda.Code.from_asset(str(pathlib.Path(__file__).parent.joinpath("s3_notification_lambda").resolve())),
             handler="index.lambda_handler",
             timeout=cdk.Duration.seconds(60),
             environment={
