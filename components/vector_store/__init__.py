@@ -30,7 +30,7 @@ from aws_cdk import (
     aws_s3 as _s3,
     aws_s3_deployment as _deployment,
     aws_lambda as _lambda,
-    aws_ecr_assets as _ecr_asset,
+    aws_ecr_assets as _ecr_assets,
     aws_s3_notifications as _notification
 )
 from constructs import Construct
@@ -117,10 +117,11 @@ class VectorStore(Construct):
             )
 
         # Create the Processing Job image
-        processing_image = _ecr_asset.DockerImageAsset(
+        processing_image = _ecr_assets.DockerImageAsset(
             self,
             "ProcessingImage",
             directory=str(pathlib.Path(__file__).parent.joinpath("image").resolve()),
+            platform=_ecr_assets.Platform.LINUX_AMD64
         )
         
         # Create the SageMaker role for the processing job, with access to the image and S3
