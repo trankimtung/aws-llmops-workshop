@@ -17,6 +17,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import pathlib
 import aws_cdk as cdk
 
 from aws_cdk import (
@@ -163,7 +164,7 @@ class Orchestration(Construct):
             "CallbackHandler",
             runtime=_lambda.Runtime.PYTHON_3_12,
             code=_lambda.Code.from_asset(
-                path="components/tuning_workflow/runtime"
+                path=str(pathlib.Path(__file__).parent.joinpath("runtime").resolve())
             ),
             handler="index.lambda_handler",
             role=callback_role,

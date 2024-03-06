@@ -17,6 +17,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import pathlib
 import constants
 import aws_cdk as cdk
 
@@ -67,7 +68,7 @@ class RagApi(Construct):
             self,
             "TextHandler",
             code=_lambda.Code.from_asset(
-                path="components/rag_api/runtime",
+                path=str(pathlib.Path(__file__).parent.joinpath("runtime").resolve()),
                 bundling=cdk.BundlingOptions(
                     image=_lambda.Runtime.PYTHON_3_12.bundling_image,
                     command=[

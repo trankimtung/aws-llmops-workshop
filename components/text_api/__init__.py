@@ -18,6 +18,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import constants
+import pathlib
 import aws_cdk as cdk
 
 from aws_cdk import (
@@ -67,7 +68,7 @@ class TextApi(Construct):
             self,
             "TextHandler",
             code=_lambda.Code.from_asset(
-                path="components/text_api/runtime",
+                path=str(pathlib.Path(__file__).parent.joinpath("runtime").resolve()),
                 bundling=cdk.BundlingOptions(
                     image=_lambda.Runtime.PYTHON_3_12.bundling_image,
                     command=[

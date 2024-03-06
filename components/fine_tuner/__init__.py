@@ -16,6 +16,7 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTIO
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import pathlib
 import aws_cdk as cdk
 
 from aws_cdk import (
@@ -93,7 +94,7 @@ class FineTuner(Construct):
             self,
             "TuningHandler",
             code=_lambda.Code.from_asset(
-                path="components/fine_tuner/runtime",
+                path=str(pathlib.Path(__file__).parent.joinpath("runtime").resolve()),
                 bundling=cdk.BundlingOptions(
                     image=_lambda.Runtime.PYTHON_3_12.bundling_image,
                     command=[
