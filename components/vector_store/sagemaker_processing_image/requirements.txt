@@ -1,5 +1,5 @@
 boto3>=1.28.67
-langchain==0.0.249
+langchain==0.0.325
 opensearch-py==2.2.0
 sagemaker
 tqdm
