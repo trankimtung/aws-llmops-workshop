@@ -30,13 +30,13 @@ from aws_cdk import (
 )
 from constructs import Construct
 
-class Orchestration(Construct):
+class FineTuningWorkflow(Construct):
 
     def __init__(self, scope: Construct, id: str, tuner: _lambda.Function, sqs_queue: _sqs.Queue) -> None:
         super().__init__(scope, id)
 
         # Create the IAM role for the fine-tuning state machine
-        orchestration_role = _iam.Role(
+        state_machine_role = _iam.Role(
             self,
             "WorkflowRole",
             assumed_by=_iam.CompositePrincipal(
@@ -109,11 +109,11 @@ class Orchestration(Construct):
         )
 
         # Create the state machine to orchestrate the fine-tuning process
-        tuning_workflow = _sfn.StateMachine(
+        tuning_state_machine = _sfn.StateMachine(
             self,
             "TuningWorkflow",
             definition_body=_sfn.DefinitionBody.from_chainable(start_step.next(wait_step)),
-            role=orchestration_role
+            role=state_machine_role
         )
 
         # Create the IAM Role for the Lambda function that starts the fine-tuning workflow
@@ -139,7 +139,7 @@ class Orchestration(Construct):
                             ],
                             effect=_iam.Effect.ALLOW,
                             resources=[
-                                f"arn:{cdk.Aws.PARTITION}:states:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:stateMachine:{tuning_workflow.state_machine_name}"
+                                f"arn:{cdk.Aws.PARTITION}:states:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:stateMachine:{tuning_state_machine.state_machine_name}"
                             ]
                         )
                     ]
@@ -170,7 +170,7 @@ class Orchestration(Construct):
             role=callback_role,
             timeout=cdk.Duration.seconds(60)
         )
-        callback_handler.add_environment(key="STATE_MACHINE_ARN", value=tuning_workflow.state_machine_arn)
+        callback_handler.add_environment(key="STATE_MACHINE_ARN", value=tuning_state_machine.state_machine_arn)
 
         # Create an event mapping between the `callback_handler` and `callback_queue`
         callback_handler.add_event_source(_event_source.SqsEventSource(sqs_queue))
