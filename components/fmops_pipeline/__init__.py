@@ -96,18 +96,18 @@ class Pipeline(Construct):
         )
 
         # Define the notification handler to start an execution of the SageMaker Pipeline
-        self.pipeline_notification = _lambda.Function(
+        self.start_pipeline_function = _lambda.Function(
             self,
             "TuningNotification",
             runtime=_lambda.Runtime.PYTHON_3_12,
-            code=_lambda.Code.from_asset(str(pathlib.Path(__file__).parent.joinpath("notification").resolve())),
+            code=_lambda.Code.from_asset(str(pathlib.Path(__file__).parent.joinpath("start_pipeline_lambda").resolve())),
             handler="index.lambda_handler",
             timeout=cdk.Duration.seconds(60),
             environment={
                 "PIPELINE_NAME": fmops_workflow.ref
             }
         )
-        self.pipeline_notification.add_to_role_policy(
+        self.start_pipeline_function.add_to_role_policy(
             _iam.PolicyStatement(
                 sid="PipelineExecutionPolicy",
                 actions=["sagemaker:StartPipelineExecution"],
@@ -119,7 +119,7 @@ class Pipeline(Construct):
         )
 
         # Bind the S3 notification to the Bucket to start the FMOps process
-        notification = _notification.LambdaDestination(self.pipeline_notification)
+        notification = _notification.LambdaDestination(self.start_pipeline_function)
         notification.bind(self, bucket=data_bucket)
         data_bucket.add_object_created_notification(
             notification,
@@ -129,21 +129,12 @@ class Pipeline(Construct):
         )
 
         # Create the Model Approval Function
-
-        # self.approval_function = _lambda.Function(
-        #     self,
-        #     "ApprovalFunction",
-        #     runtime=_lambda.Runtime.PYTHON_3_12,
-        #     code=_lambda.Code.from_asset(str(pathlib.Path(__file__).parent.joinpath("event").resolve())),
-        #     handler="index.lambda_handler",
-        #     timeout=cdk.Duration.seconds(60)
-        # )
-        self.approval_function = _lambda.Function(
+        self.deploy_model_function = _lambda.Function(
             self,
             "ApprovalFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             code=_lambda.Code.from_asset(
-                path=str(pathlib.Path(__file__).parent.joinpath("event").resolve()),
+                path=str(pathlib.Path(__file__).parent.joinpath("deploy_model_lambda").resolve()),
                 bundling=cdk.BundlingOptions(
                     image=_lambda.Runtime.PYTHON_3_12.bundling_image,
                     command=[
@@ -154,7 +145,7 @@ class Pipeline(Construct):
             handler="index.lambda_handler",
             timeout=cdk.Duration.seconds(60)
         )
-        self.approval_function.add_to_role_policy(
+        self.deploy_model_function.add_to_role_policy(
             statement=_iam.PolicyStatement(
                 sid="BedrockAccess",
                 actions=[
@@ -185,7 +176,7 @@ class Pipeline(Construct):
                 }
             ),
             targets=[
-                _targets.LambdaFunction(self.approval_function)
+                _targets.LambdaFunction(self.deploy_model_function)
             ]
         )
 
