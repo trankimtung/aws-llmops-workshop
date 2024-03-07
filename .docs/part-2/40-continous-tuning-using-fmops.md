@@ -1,6 +1,6 @@
 # Continuous Fine-tuning using FMOps
 
-Continuous Tuning is the iterative refinement process of a foundation model using a labeled dataset. This process deviates from the traditional Continuous Training approach in MLOps, where the focus is on retraining classical or deep-learning ML models.
+Continuous Tuning is the iterative refinement process of a foundation model using a fine-tuning dataset. This process deviates from the traditional Continuous Training approach in MLOps, where the focus is on retraining classical or deep-learning ML models.
 
 Continuous Training, within the context of the MLOps methodology, is to retrain a model with additional data and optimizes the model by tweaking hyperparameters to create a new version of the model. This process consists of performing various steps, such as data pre-processing, model training, model evaluation, and model versioning. 
 
@@ -8,9 +8,9 @@ On AWS, this process can be automated using Amazon SageMaker Pipelines. As illus
 
 ![](../img/continuous-training.png)
 
-When using the LLMOps methodology to build end-to-end generative AI applications, the continuous training stage - typically associated with MLOps - now becomes a continuous fine-tuning stage. This is where FMOps, a subset of MLOps for fine-tuning Foundation Models is used. 
+When using the LLMOps methodology to build end-to-end generative AI applications, the Continuous Training stage - typically associated with MLOps - now becomes a Continuous Fine-tuning stage. This is where FMOps, a subset of MLOps for fine-tuning Foundation Models is used. 
 
-Amazon Bedrock enables the fine-tuning of various foundation models using your labeled tuning dataset to enhance model performance on domain-specific tasks. However, as Amazon SageMaker Pipelines don't currently offer direct integration with Bedrock fine-tuning, we automate the fine-tuning stage of FMOps with a Callback Step. In this setup, SageMaker Pipeline employs a callback step to dispatch a message to an Amazon Simple Queue Service (SQS) queue, initiating a serverless Amazon Step Functions workflow. This workflow coordinates AWS Lambda Functions responsible for orchestrating the Bedrock fine-tuning process. Once the Bedrock model fine-tuning has completed, the SageMaker Pipeline evaluates the performance metrics associated with the fine-tuned model and stores the fine-tuned model metadata in the SageMaker Model Registry. Data Scientists, or ML practitioners can then evaluate the new model version to determine whether it is a viable candidate for production release. It's at this stage of the process, where FMOps mirrors the MLOps process - upon approving the fine-tuned model version, the CI/CD pipeline automates the integration and deployment of the generative AI application to leverage the new model version. The entire fine-tuning process is triggered when labeled domain data is uploaded to an S3 bucket.
+Amazon Bedrock supports fine-tuning with various foundation models using your tuning dataset to enhance model performance on domain-specific tasks. However, as Amazon SageMaker Pipelines don't currently offer direct integration with Bedrock fine-tuning, we automate the fine-tuning stage of FMOps with a Callback Step. In this setup, SageMaker Pipeline employs a Callback step to dispatch a message to an Amazon Simple Queue Service (SQS) queue, initiating a serverless Amazon Step Functions State Machine. This state machine coordinates AWS Lambda Functions responsible for orchestrating the Bedrock fine-tuning jobs. Once the Bedrock fine-tuning job has completed, the SageMaker Pipeline evaluates the performance metrics associated with the fine-tuned model and stores the fine-tuned model metadata in the SageMaker Model Registry. Data Scientists, or ML practitioners can then evaluate the new model version to determine whether it is a viable candidate for production release. It's at this stage of the process, where FMOps mirrors the MLOps process - upon approving the fine-tuned model version, the CI/CD pipeline automates the integration and deployment of the Generative AI application to leverage the new model version. The entire fine-tuning process is triggered when labeled domain data is uploaded to an S3 bucket.
 
 The following diagram illustrates this process, and the architecture you will be creating when you add the continuous tuning stage to the CI/CD pipeline:
 
@@ -26,7 +26,7 @@ In this section, you will add the continuous tuning stage to the `ToolChainStack
 ## Steps
 
 
-### Configure solution constants
+### Update the `constants.py` file
 
 1. In the AWS Management Console, navigate to the CloudFormation service.
    
@@ -49,13 +49,13 @@ In this section, you will add the continuous tuning stage to the `ToolChainStack
    
 2. For each of the following sections, copy the code into the corresponding section of the `tuning.py` file
 
-Retrieve the pipeline variables from the toolchain context. This loads the model customization values, such as Epochs, Batch size, Learning rate, and Learning warmup steps. These parameters are used to tweak the fine-tuning process for the custom model.
+Retrieve the pipeline variables from the toolchain context. This loads the fine-tuning parameters, such as Epochs, Batch size, Learning rate, and Learning warmup steps. These parameters are used to tweak the foundation model fine-tuning process.
 
 ```python
         context = self.node.try_get_context("toolchain-context")
 ```
 
-Create the S3 buckets, which will trigger the fine-tuning model customization process when a tuning dataset is uploaded.
+Create an S3 buckets, which will trigger the fine-tuning process when a fine-tuning dataset is uploaded.
 
 ```python
         tuning_bucket = _s3.Bucket(
@@ -69,7 +69,7 @@ Create the S3 buckets, which will trigger the fine-tuning model customization pr
         cdk.CfnOutput(self, "TuningDataBucketName", value=tuning_bucket.bucket_name)
 ```
 
-Create an Amazon Bedrock service IAM role that grants Bedrock access permissions to the tuning data in the tuning_bucket.
+Create an Amazon Bedrock service IAM role that grants Bedrock access permissions to the fine-tuning data in the `tuning_bucket`.
 
 ```python
         bedrock_role = _iam.Role(
@@ -112,7 +112,7 @@ Create an Amazon Bedrock service IAM role that grants Bedrock access permissions
         )
 ```
 
-Define the SQS callback queue that integrates the fine-tuning workflow processes with the FMOps SageMaker Pipeline. As mentioned earlier, there is currently no direct integration between a SageMaker Pipeline and Bedrock. The SQS queue acts as the bridge between the FMOps pipeline Callback step and the Bedrock model customization workflow.
+Define the SQS callback queue that integrates the fine-tuning workflow with the FMOps SageMaker Pipeline. As mentioned earlier, there is currently no direct integration between a SageMaker Pipeline and Bedrock. The SQS queue acts as the bridge between the FMOps pipeline Callback step and the Bedrock fine-tuning jobs.
 
 ```python
         callback_queue = _sqs.Queue(
@@ -122,22 +122,22 @@ Define the SQS callback queue that integrates the fine-tuning workflow processes
         )
 ```
 
-Add the fine-tuning handler, using the pre-defined `FineTuner` component. This component consists of a Lambda function that creates the fine-tuning job to customize the foundation model. The Lambda function also monitors the status of the fine-tuning job, and reports the status back to the FMOps pipeline.
+Add the fine-tuning handler, using the pre-defined `FineTuner` component. This component consists of a Lambda function that creates a Bedrock fine-tuning job to customize the foundation model. The Lambda function can also monitor the status of the fine-tuning job, and report the status back to the FMOps pipeline.
 
 ```python
         fine_tuner = FineTuner(self, "FineTuner")
 ```
 
-With the fine-tuning handler defined, we now add the Bedrock service role as an environment variable. This allows the Lambda function to pass the Bedrock service role when starting, and monitoring the fine-tuning job.
+With the fine-tuning handler defined, we now add the Bedrock service role as an environment variable. This allows the Lambda function to assume the Bedrock service role when starting, and monitoring the fine-tuning job.
 
 ```python
         fine_tuner.fine_tuner_handler.add_environment(key="BEDROCK_ROLE", value=bedrock_role.role_arn)
 ```
 
-Next, create the fine-tuning workflow, using the pre-defined workflow `Orchestration` component. This component is an AWS Step Functions workflow that coordinates the fine-tuning handler.
+Next, create the fine-tuning workflow, using the pre-defined `FineTuningWorkflow` component. This component is an AWS Step Functions State Machine that coordinates the fine-tuning handler.
 
 ```python
-        tuning_workflow = Orchestration(
+        FineTuningWorkflow(
             self,
             "TuningWorkflow",
             tuner=fine_tuner.fine_tuner_handler,
@@ -145,7 +145,7 @@ Next, create the fine-tuning workflow, using the pre-defined workflow `Orchestra
         )
 ```
 
-The Step Functions flow is illustrated below. The workflow leverages the fine-tuning handler to start the Bedrock model customization job. After a 10-minute wait period, the workflow orchestrates the fine-tuning handler to verify the status of the model customization job. If the status indicates that the customization process is `InProgress`, the workflow waits another 10 minutes before checking the status again. Once the status shows that the customization process is `Complete`, the workflow reports a `Success` state back to the FMOps pipeline. Should the customization process fail, or be manually terminated, the workflow reports a `Failure` state back to the FMOps pipeline.
+The Step Functions State Machine is illustrated below. The state machine leverages the fine-tuning handler to start a Bedrock fine-tuning job. After a 10-minute wait period, the state machine invokes the fine-tuning handler to verify the status of the running fine-tuning job. If the status indicates that the fine-tuning job is `InProgress`, the workflow waits another 10 minutes before checking the status again. Once the status shows that the fine-tuning job is `Complete`, the workflow reports a `Success` state back to the FMOps pipeline. Should the fine-tuning job fail, or be manually terminated, the workflow reports a `Failure` state back to the FMOps pipeline.
 
 ![](../img/orchestration-step-function.png)
 
@@ -160,15 +160,15 @@ Next, we add the FMOps pipeline, using the pre-defined `Pipeline` component. Thi
         )
 ```
 
-In the above code, the `tuning_bucket` and `callback_queue` are specified as arguments, linking the Pipeline to the data in S3, and using the SQS queue to connect it to the Bedrock model customization workflow, by means of a Callback step. The following image shows what the FMOps pipeline looks like in the Amazon SageMaker Studio IDE:
+In the above code, the `tuning_bucket` and `callback_queue` are specified as arguments, linking the FMOps pipeline to the data S3 bucket, and using the SQS queue to connect it to the Bedrock fine-tuning jobs, by means of a Callback step. The following image shows what the FMOps pipeline looks like in the Amazon SageMaker Studio IDE:
 
 ![](../img/fmops-pipeline.png)
 
-The pipeline is structured as a directed acyclic graph (DAG). detailing each step of the pipeline along with the relationships between them. The data dependencies are encoded between each step, where the properties of a step's output are passed as an input to the next step. Each step is described below:
+The pipeline is structured as a directed acyclic graph (DAG), detailing each step of the pipeline along with the relationships between them. The data dependencies are encoded between each step, where the properties of a step's output are passed as inputs to the next step. Each step is described below:
 
 1. The `DataPreprocessing` step of the FMOps pipeline runs a SageMaker Processing job to read the fine-tuning data and split it into separate training and validation datasets. Once these datasets are created and stored in the tuning bucket, these data dependencies are passed onto the `FineTuning` step.
 
-2. `FineTuning` is a Callback step to start the fine-tuning orchestration workflow. If the model customization process is successfully completed, the validation metric data dependencies are passed onto the `ModelEvaluation` step.
+2. `FineTuning` is a Callback step to start the fine-tuning workflow. If the model customization process is successfully completed, the validation metric data dependencies are passed onto the `ModelEvaluation` step.
 
 3. `ModelEvaluation` executes another processing job to extract, and store these metrics as metadata.
 
@@ -179,19 +179,19 @@ The pipeline is structured as a directed acyclic graph (DAG). detailing each ste
 With the pre-defined components declared, we can add the toolchain context variables - as Pipeline parameters  - to initialize the FMOps process.
 
 ```python
-        fmops_pipeline.pipeline_notification.add_environment(key="BASE_MODEL", value="amazon.titan-text-express-v1")
-        fmops_pipeline.pipeline_notification.add_environment(key="EPOCHS", value=context.get("tuning-epoch-count"))
-        fmops_pipeline.pipeline_notification.add_environment(key="BATCHES", value=context.get("tuning-batch-size"))
-        fmops_pipeline.pipeline_notification.add_environment(key="LEARNING_RATE", value=context.get("tuning-learning-rate"))
-        fmops_pipeline.pipeline_notification.add_environment(key="WARMUP_STEPS", value=context.get("tuning-warmup-steps"))
+        fmops_pipeline.start_pipeline_function.add_environment(key="BASE_MODEL", value=context.get("tuning-bedrock-base-model"))
+        fmops_pipeline.start_pipeline_function.add_environment(key="EPOCHS", value=context.get("tuning-epoch-count"))
+        fmops_pipeline.start_pipeline_function.add_environment(key="BATCHES", value=context.get("tuning-batch-size"))
+        fmops_pipeline.start_pipeline_function.add_environment(key="LEARNING_RATE", value=context.get("tuning-learning-rate"))
+        fmops_pipeline.start_pipeline_function.add_environment(key="WARMUP_STEPS", value=context.get("tuning-warmup-steps"))
 ```
 
-Next you initialize the model approval event handler that starts the CI/CD release change. This allows you to redeploy the generative AI application and its infrastructure into production, once the ML practitioners have approved the fine-tuned model.
+Next you initialize the model approval event handler that starts the CI/CD release change. This enables the pipeline to automatically redeploy the generative AI application and its infrastructure into production, once the ML practitioners have approved the fine-tuned model.
 
 ```python
-        fmops_pipeline.approval_function.add_environment(key="PIPELINE_NAME", value=pipeline_name)
-        fmops_pipeline.approval_function.add_environment(key="MODEL_PARAMETER", value=model_parameter)
-        fmops_pipeline.approval_function.add_to_role_policy(
+        fmops_pipeline.deploy_model_function.add_environment(key="PIPELINE_NAME", value=pipeline_name)
+        fmops_pipeline.deploy_model_function.add_environment(key="MODEL_PARAMETER", value=model_parameter)
+        fmops_pipeline.deploy_model_function.add_to_role_policy(
             statement=_iam.PolicyStatement(
                 sid="ModelParameterAccess",
                 actions=["ssm:PutParameter"],
@@ -201,7 +201,7 @@ Next you initialize the model approval event handler that starts the CI/CD relea
                 ]
             )
         )
-        fmops_pipeline.approval_function.add_to_role_policy(
+        fmops_pipeline.deploy_model_function.add_to_role_policy(
             statement=_iam.PolicyStatement(
                 sid="CodePipelineAccess",
                 actions=["codepipeline:StartPipelineExecution"],
@@ -223,7 +223,7 @@ Next you initialize the model approval event handler that starts the CI/CD relea
 
 1. Open the `stacks/toolchain.py` file.
 
-2. Copy the following code into the corresponding section to use the `_add_stage()` method to add tuning stack as the Continuous Tuning stage:
+2. Copy the following code into the corresponding section:
 
 ```python
         ToolChainStack._add_stage(
@@ -287,15 +287,15 @@ When it completes, the pipeline will look as follows:
 
 ![](../img/completed-fmops-pipeline.png)
 
-The `DataPreprocessing` step of the FMOps pipeline runs the SageMaker Processing job to take the sample dataset that was uploaded to S3, and split the data into a Train and Validation set. The Processing job then stores these datasets in the tuning S3 bucket.
+The `DataPreprocessing` step of the FMOps pipeline runs the SageMaker Processing job to take the sample dataset that was uploaded to S3, and split the data into a train and validation set. The Processing job then stores these datasets in the tuning S3 bucket.
 
 > Note: Each of these datasets has only a single sample. This has been done to speed up the tuning process and save time during the workshop. The runtime logic to run this pre-processing task can be viewed in the `/workshop-code/components/fmops_pipeline/scripts/preprocessing.py` file.
 
-The `FineTuning` step uses SQS to send a message to the Step Functions workflow which orchestrates the Bedrock model customization job, using the Train and Validation datasets from the `DataPreprocessing` step. The execution of the Step Function workflow can be viewed by searching for and clicking on the Step Functions service console. When complete, the execution for the `TuningWorkflow` will look as follows:
+The `FineTuning` step uses SQS to send a message to the Step Functions State Machine which orchestrates the Bedrock model fine-tuning job, using the train and validation datasets from the `DataPreprocessing` step. The execution of the Step Function State Machine can be viewed by searching for and clicking on the Step Functions service console. When complete, the execution for the `TuningWorkflow` will look as follows:
 
 ![](../img/running-orchestration-step-functions.png)
 
-> Note: You can also see the the Bedrock tuning job, by searching for Amazon Bedrock in the AWS console. Once the Bedrock console is open, use the left-hand navigation panel to select Custom models. For details about the training job, select the Training Jobs tab on the Custom Models page.
+> Note: You can also see the the Bedrock fine-tuning job, by searching for Amazon Bedrock in the AWS console. Once the Bedrock console is open, use the left-hand navigation panel to select `Custom models`. For details about the training job, select the `Training jobs` tab on the Custom Models page.
 
 The `ModelEvaluation` step of the FMOps pipeline opens the `validation_metrics.csv` file, which is an output from the `FineTuning` step, and reads the Perplexity score for the fine-tuned model on the validation dataset. This metric, along with the validation Loss metric are stored in the tuning S3 bucket.
 
@@ -303,7 +303,7 @@ The `ModelEvaluation` step of the FMOps pipeline opens the `validation_metrics.c
 
 The final step of the FMOps pipeline is the `RegisterModel` step. This step captures the validation metric output from the `ModelEvaluation` step and stores these as metadata in the SageMaker Model Registry.
 
-At is at this point that the ML Practitioner views the perplexity score of the model version, and assess the custom model's performance against the key performance indicators for the use case. If the model meets the production criteria, the ML Practitioner can perform one or more of the following tasks:
+It is at this point that the ML Practitioner views the perplexity score of the model version, and assess the custom model's performance against the key performance indicators for the use case. If the model meets the production criteria, the ML Practitioner can perform one or more of the following tasks:
 
 - Purchase [Provisioned Throughput](https://docs.aws.amazon.com/bedrock/latest/userguide/prov-throughput.html) for the model version.
 - Manually perform use case specific prompt tests against the model version.
@@ -315,18 +315,18 @@ Once the model version has been deemed suitable for production, it can be manual
 
 ### Approve the model for production
 
-1. To approve a model for production, use the SageMaker Studio IDE, expand the `Models` menu option in the left-hand navigation panel, and select the Model registry option.
+1. To approve a model for production, use the SageMaker Studio IDE, navigate to the `Models` menu option in the left-hand navigation panel, and select the `Registered models` tab.
 
-2. Click the `<WORKLOAD NAME>-PackageGroup` group, and click the latest version of the model package.
+2. Click the `<WORKLOAD NAME>-PackageGroup` group, and select the latest version of the model package.
 
-3. Use the `Actions` button, in the top-right, select the `Update status` option from the drop-down, and then click the `Approved` option.
+3. Use the `Actions` button, in the top-right, select the `Update model status` option from the drop-down.
 
-4. In the Approve model version dialog window, provide an option comment for approval, and then click the `Save and update` button.
+4. In the `Update model status` dialog window, Change the `Status` value to `Approved` option, provide an optional comment for approval, and then click the `Save and update` button.
 
-5. Use the AWS console to search for, and open the CodePipeline console. Select the CI/CD/CT pipeline to see release change to re-deploy the generative AI application, and Bedrock backend to use the new custom model.
+5. Navigate to CodePipeline service in the AWS console. Select the CI/CD/CT pipeline and confirm that a new release in in progress. The release will re-deploy the Generative AI application to tell it to use the new fine-tuned model.
 
 ## Summary
 
-In this section, you added a continuous tuning stage to the CodePipeline, automatically fine-tuned your model, and saw how the CI/CD/CT pipeline automatically updated and deployed the generative AI application to use the new model. In the next section, you will deploy a way to add context to your prompts and query data without having to fine-tune a model.
+In this section, you added a continuous tuning stage to the CodePipeline, automatically fine-tuned your model, and saw how the CI/CD/CT pipeline automatically updated and deployed the generative AI application to use the fine-tuned model. In the next section, you will deploy a way to add context to your prompts and query data without having to fine-tune a model.
 
 [Click here to proceed to the next section.](/.docs/part-2/50-retrieval-augmented-generation.md)
