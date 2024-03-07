@@ -29,7 +29,7 @@ from aws_cdk import (
 from botocore.exceptions import ClientError
 from constructs import Construct
 from components.fine_tuner import FineTuner
-from components.tuning_workflow import Orchestration
+from components.tuning_workflow import FineTuningWorkflow
 from components.fmops_pipeline import Pipeline
 
 class TuningStack(cdk.Stack):
