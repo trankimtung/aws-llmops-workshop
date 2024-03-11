@@ -136,7 +136,7 @@ def get_embedding(passage: str) -> List[float]:
 
 
 def get_hits(query: str, url: str, username: str, password: str) -> List[dict]:
-    k = 3  # Retrieve Top 3 matching context from search
+    k = 5  # Retrieve top 5 matching context from search
     search_query = {
         "size": k,
         "query": {
@@ -176,20 +176,64 @@ def get_prediction(question: str) -> str:
         logging.info(f"Score: {hit['_score']} | Document: {hit['_source']['file_name']} | Passage: {hit['_source']['passage']}\n")
     
     logger.info(f"Sending prompt to Bedrock (Using OpenSearch context) ...")
-    context = hits[0]['_source']['passage'] # Top hit from search
-    prompt_template = f"""\n\nHuman: You are a helpful assistant, helping a Human answer questions in a friendly tone. Use the following references as additional context to provide a concise answer to the question at the end.
+    context = "\n".join([hit["_source"]["passage"] for hit in hits])
 
-    <reference>
+    logger.info(f"Bedrock model Id: {TEXT_MODEL_ID}")
+
+    if TEXT_MODEL_ID == "anthropic.claude-3-sonnet-20240229-v1:0" or TEXT_MODEL_ID == "anthropic.claude-instant-v1":
+        answer = invoke_anthropic_model(question=question, context=context)
+    else:
+        logger.info(f"Model is not supported: {TEXT_MODEL_ID}")
+        answer = build_response(
+            {
+                "status": "error",
+                "message": f"Model is not supported: {TEXT_MODEL_ID}"
+            }
+        )
+
+    logger.info(f"Bedrock returned the following answer: {answer}")
+    return answer
+
+def invoke_anthropic_model(question: str, context: str) -> Any:
+    prompt = f"""I'm going to give you a document. Then I'm going to ask you a question about it. I'd like you to first write down exact quotes of parts of the document that would help answer the question, and then I'd like you to answer the question using facts from the quoted content. Here is the document:
+
+    <document>
     {context}
-    </reference>
+    </document>
+
+    First, find the quotes from the document that are most relevant to answering the question, and then print them in numbered order. Quotes should be relatively short.
+
+    If there are no relevant quotes, write "No relevant quotes" instead.
+
+    Then, answer the question, starting with "Answer:". Unless you are aksed to quote the document, do not include or reference quoted content verbatim in the answer. Don't say "According to Quote [1]" when answering. Instead make references to quotes relevant to each section of the answer solely by adding their bracketed numbers at the end of relevant sentences.
+
+    Thus, the format of your overall response should look like what's shown between the <example></example> tags. Make sure to follow the formatting, spacing and line breaking exactly.
+
+    <example>
+    Relevant quotes:\n
+    [1] "Company X reported revenue of $12 million in 2021."\n
+    [2] "Almost 90% of revene came from widget sales, with gadget sales making up the remaining 10%."\n
+
+    Answer:\n
+    Company X earned $12 million. [1]  Almost 90% of it was from widget sales. [2]
+    </example>
+
+    Here is the question: {question}
+
+    If the question cannot be answered by the document, say so.
     
-    Question: {question}\n\nAssistant:"""
+    Answer the question immediately without preamble.
+    """
+
     response = bedrock_client.invoke_model(
         body=json.dumps(
             {
-                "prompt": prompt_template,
-                "max_tokens_to_sample": 200,
-                "anthropic_version": "bedrock-2023-05-31"
+                "max_tokens": 8192,
+                "anthropic_version": "bedrock-2023-05-31",
+                "temperature": 0.5,
+                "top_k": 250,
+                "top_p": 1,
+                "messages": [{"role": "user", "content": prompt}],
             }
         ),
         modelId=TEXT_MODEL_ID,
@@ -197,6 +241,5 @@ def get_prediction(question: str) -> str:
         contentType="application/json"
     )
     response_body = json.loads(response.get("body").read())
-    answer = response_body.get("completion")
-    logger.info(f"Bedrock returned the following answer: {answer}")
-    return answer
+    return response_body.get("content")[0].get("text")
+
