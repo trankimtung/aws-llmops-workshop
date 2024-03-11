@@ -71,45 +71,19 @@ def validate_inputs(body: Dict):
 
 
 def get_prediction(question: str) -> str:
-    # prompt_template = f"""\n\nHuman: You are a helpful assistant, helping a Human to answer questions in a friendly tone. Provide a concise answer to the question at the end. If you don't know the answer, explain why you don't know, and don't try to make up an answer.\nQuestion: {question}\n\nAssistant:"""
+    logger.info(f"Bedrock model Id: {TEXT_MODEL_ID}")
     logger.info(f"Sending prompt to Bedrock (RAG disabled) ... ")
-    # response = bedrock_client.invoke_model(
-    #     # Model Parameters for Claude Instant v1.2
-    #     body=json.dumps(
-    #         {
-    #             "prompt": prompt_template,
-    #             "max_tokens_to_sample": 4096,
-    #             "temperature": 0.5,
-    #             "top_k": 250,
-    #             "top_p": 1,
-    #             "stop_sequences": [
-    #                 "\n\nHuman:"
-    #             ],
-    #             "anthropic_version": "bedrock-2023-05-31"
-    #         }
-    #     ),
-    #     modelId=TEXT_MODEL_ID,
-    #     accept="*/*",
-    #     contentType="application/json"
-    # )
-    # response_body = json.loads(response.get("body").read())
-    # answer = response_body.get("completion")
-    # logger.info(f"Bedrock returned the following answer: {answer}")
-    # return answer
-    if TEXT_MODEL_ID == "anthropic.claude-instant-v1":
-        # Invoke default `anthropic.claude-instant-v` model
-        # NOTE: This is the default for the application
-        prompt_template = f"""\n\nHuman: You are a helpful assistant, helping a Human to answer questions in a friendly tone. Provide a concise answer to the question at the end. If you don't know the answer, explain why you don't know, and don't try to make up an answer.\nQuestion: {question}\n\nAssistant:"""
+    if TEXT_MODEL_ID == "anthropic.claude-3-sonnet-20240229-v1:0" or TEXT_MODEL_ID == "anthropic.claude-instant-v1":
         response = bedrock_client.invoke_model(
             body=json.dumps(
                 {
-                    "prompt": prompt_template,
-                    "max_tokens_to_sample": 4096,
+                    "max_tokens": 4096,
+                    "anthropic_version": "bedrock-2023-05-31",
                     "temperature": 0.5,
-                    "top_k": 250,
-                    "top_p": 1,
-                    "stop_sequences": ["\n\nHuman:"],
-                    "anthropic_version": "bedrock-2023-05-31"
+	                "top_k": 250,
+	                "top_p": 1,
+                    "system": "You are a helpful assistant answering a human's questions. Provide a concise answer. Use a friendly tone. If the questions cannot be answered, say so. Do not make up answers. Answer the questions immediately without preamble.",
+                    "messages": [{"role": "user", "content": question}],
                 }
             ),
             modelId=TEXT_MODEL_ID,
@@ -117,10 +91,9 @@ def get_prediction(question: str) -> str:
             contentType="application/json"
         )
         response_body = json.loads(response.get("body").read())
-        answer = response_body.get("completion")  
-    elif TEXT_MODEL_ID == "meta.llama2-13b-chat-v1":
-        # Invoke `meta.llama2-13b-chat-v1` model
-        prompt_template = f"""{question}"""
+        answer = response_body.get("content")[0].get("text")
+    elif TEXT_MODEL_ID == "meta.llama2-13b-chat-v1" or TEXT_MODEL_ID == "meta.llama2-70b-chat-v1":
+        prompt_template = f"""[INST]You are a helpful assistant answering a human's questions. Provide a concise answer. Use a friendly tone. If the questions cannot be answered, say so. Do not make up answers. Answer the questions immediately without preamble.[/INST]\n\n{question}"""
         response = bedrock_client.invoke_model(
             body=json.dumps(
                 {
@@ -138,7 +111,7 @@ def get_prediction(question: str) -> str:
         answer = response_body.get("generation")      
     else:
         # Invoke fine-tuned model
-        prompt_template = f"""You are a helpful Assistant helping a Human answer questions in a friendly tone.\nHuman: {question}\nAssistant:"""
+        prompt_template = f"""You are a helpful assistant answering a human's questions. Provide a concise answer. Use a friendly tone. If the questions cannot be answered, say so. Do not make up answers. Answer the questions immediately without preamble.\n\nUser: {question}"""
         response = bedrock_client.invoke_model(
             body=json.dumps(
                 {
