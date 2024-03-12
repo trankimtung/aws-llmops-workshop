@@ -254,14 +254,7 @@ git push ccm main
 
 1. Take a look at the tuning data set at `tuning-data/data.jsonl`.
    
-The provided dataset is a sample of the `cnn_dailymail` dataset, available from [Hugging Face](https://huggingface.co/datasets/cnn_dailymail), and released under the Apache-2.0 License. It has been pre-processed to fit the formatting requirements of Amazon Bedrock. For example, the original data is comprised of the news article, the article highlights summarization, and the article id columns. To fit the Bedrock requirements, the provided dataset has been reformatted as follows, and stored as a JSON lines formatted file:
-
-```json
-{"input": "<article>", "output": "<highlights>"}
-{"input": "<article>", "output": "<highlights>"}
-{"input": "<article>", "output": "<highlights>"}
-...
-```
+The provided dataset is a sample of the `cnn_dailymail` dataset, available from [Hugging Face](https://huggingface.co/datasets/cnn_dailymail), and released under the Apache-2.0 License.
 
 2. Upload the data file to the tuning S3 bucket, with the following command, to trigger the fine-tuning process:
 

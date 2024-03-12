@@ -22,10 +22,22 @@ import os
 # os.system("pip install -U 'datasets==2.16.1'")
 from datasets import load_dataset, DatasetDict
 
-
-def load(dataset_name="cnn_dailymail", config="3.0.0"):
+# download public dataset from Hugging Face
+def load(dataset_name='cnn_dailymail', config='3.0.0'):
     dataset = load_dataset(dataset_name, config)
     return dataset
+
+# load local dataset
+def load_local(path: str):
+    dataset = load_dataset('json', data_files=path, split='train')
+    dataset = dataset.train_test_split(test_size=0.2, seed=123)
+    test = dataset['test']
+    dataset = dataset['train'].train_test_split(test_size=0.2, seed=123)
+    return DatasetDict({
+        'train': dataset['train'],
+        'test': test,
+        'validation': dataset['test']
+    })
 
 def process(dataset, input_feature_name='input', output_feature_name='output'):
     dataset = dataset.remove_columns(['id'])
@@ -56,12 +68,14 @@ def save(dataset, path):
     dataset['validation'].to_json(os.path.join(path,'validation','data.jsonl'))
 
 if __name__ == '__main__':
+    input_path = '/opt/ml/processing/input'
     output_path = '/opt/ml/processing/output'
     
-    dataset = load("cnn_dailymail", "3.0.0")
+    # dataset = load("cnn_dailymail", "3.0.0")
+    dataset = load_local(os.path.join(input_path, 'data.jsonl'))
     dataset = process(dataset,'input','output')
     dataset = sample(dataset, sample_size=1)
     dataset = clip_text(dataset)
-    print("Saving datasets to S3 ...")
+    print('Saving datasets to S3 ...')
     save(dataset, output_path)
-    print("Done!")
+    print('Done!')
