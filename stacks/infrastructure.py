@@ -57,7 +57,7 @@ class InfrastructureStack(cdk.Stack):
 
 
         # Define the Bedrock Image API using the pre-built `ImageApi` component
-        
+
 
 
         # Expose the Image API Endpoint as a CloudFormation output, for use during system testing
