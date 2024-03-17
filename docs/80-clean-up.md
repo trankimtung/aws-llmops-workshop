@@ -1,9 +1,10 @@
 # Clean Up
 
+Congratulations, you have completed the workshop!
+
+You may now clean up the resources created in this workshop to avoid incurring any additional costs.
 
 ## Delete the CloudFormation Stacks
-
-**Congratulations, you have finished the workshop!**
 
 Now you will clean up the resources created in this workshop.
 

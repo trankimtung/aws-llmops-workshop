@@ -7,16 +7,18 @@ This workshop will give you hands-on experience operationalizing Generative AI a
 # Agenda
 
 This workshop can be completed in 6-8 hours, either self-paced or instructor-led, depending on the participant's familiarity with AWS, DevOps and Generative AI concepts. It is divided into two parts:
-- Part 1: Deploy Generative AI applications to AWS
+- [Part 1: Deploy Generative AI applications to AWS](/part-01/)
     - Introduction to the demo application
     - Writing infrastructure as code (IaC) with AWS CDK
     - Deploying demo application to AWS
     - Building a CICD pipeline with AWS CodePipeline
 
-- Part 2: Evolving Generative AI applications
+- [Part 2: Evolving Generative AI applications](/part-02/)
     - Introduction to Amazon Bedrock
     - Implementing continuous fine-tuning
     - Implementing retrieval augmented generation (RAG)
+
+Navigate to [Before you begin](/10-before-you-begin.md) to start preparation.
 
 
 # Pre-requisites
