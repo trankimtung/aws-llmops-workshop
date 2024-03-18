@@ -1,7 +1,6 @@
 # Building a Continuous Integration and Continuous Deployment Pipeline
 
-In the previous chapter  you have observed how AWS CDK works, manually deployed both the infrastructure code and the demo application to a test environment and verified that they are working as expected. Now you will build a Continuous Integration and Continuous Deployment (CI/CD) pipeline to automate that process, targeting both a QA and a Production environment.
-
+In the previous chapter  you have observed how AWS CDK works, manually deployed both the infrastructure code and the demo application to a test environment and verified that they are working as expected. Now you will build a Continuous Integration and Continuous Deployment (CI/CD) pipeline to automate that process, targeting a QA and a Production environment.
 
 This diagram shows what the architecture looks like after a CI/CD pipeline, backed by AWS CodePipeline, is added:
 
@@ -33,7 +32,7 @@ Overall, CI/CD enables organizations to deliver software faster, with higher qua
 
 # Steps
 
-Follow the steps below to build a CI/CD pipeline for the demo Generative AI application:
+Follow the steps below to create a CI/CD pipeline for the demo Generative AI application:
 
 ## Create the `ToolChainStack`
 
@@ -147,7 +146,7 @@ Leave the Continuous Tuning stage blank. You will add this stage in later part o
 
 3. Make sure to save the `toolchain.py` file.
 
-After all additions, the `ToolChainStack` class should look like:
+After all additions, your `ToolChainStack` class should look like:
 
 ![](../img/toolchain-stack.png)
 
@@ -173,7 +172,7 @@ After all additions, the `ToolChainStack` class should look like:
 
 4. Save the `app.py` file.
 
-The `app.py` file should now look like this:
+Your `app.py` file should now look like this:
 
 ![](../img/app-py-with-toolchain.png)
 
@@ -211,9 +210,9 @@ git push ccm main
 
 4. Using the AWS Management Console, refresh the CodeCommit Repository page. You'll now see that the repository is populated with the source code. With the code now stored in a repository and integrated into a CI/CD Pipeline, any modifications will initiate a pipeline execution.
 
-5. In the AWS console, search for, and click on the `CodePipeline` service. Notice that now instead of `Failed`, the most recent execution is `In progress`. The code pipeline is now able to execute the stages you built in the `toolchain.py` file. When any modifications are made to the source code, regardless of whether to the components, infrastructure stack, toolchain stack, or other files, the toolchain is automatically updated and the pipeline is re-executed. At each stage, the pipeline checks to see if the changes affected the current stage, and if it does, automatically makes the necessary changes. This is the self-mutating piece of the pipeline. You can now see a visual of the QA and Prod stages that you added to the pipeline.
+5. In the AWS console, search for, and click on the `CodePipeline` service. Notice that now instead of `Failed`, the most recent execution is `In progress`. The code pipeline is now able to execute the stages you built in the `toolchain.py` file. When any modifications are made to the source code, regardless of whether to the components, infrastructure stack, toolchain stack, or other files, the toolchain is automatically updated and the pipeline is re-executed. At each stage, the pipeline checks to see if the changes affecting the current stage, and if it does, automatically makes the necessary changes. This is the self-mutating piece of the pipeline. You can now see a visual of the QA and Prod stages that you added to the pipeline.
 
-6. Wait for the pipeline to finish.
+6. Wait for the pipeline to complete.
 
 > Note: The CI/CD pipeline execution should take approximately 20 minutes to complete.
 
@@ -225,5 +224,8 @@ git push ccm main
 
 3. Repeat steps 1 and 2 for the Production environment.
 
-4. You can also click on the View logs link for the `SystemTests` action within the QA stage. This will display the results of the automated system test that need to pass before the solution can be deployed into production.
+4. You can also click on the `View logs` link for the `SystemTests` action within the QA stage. This will display the results of the automated system test that need to pass before production deployment starts.
 
+# Next steps
+
+Navigate to [Evolving Generative AI applications](/part-02/) to start part 2 of the workshop.

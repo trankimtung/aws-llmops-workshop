@@ -6,10 +6,7 @@ First, you will need to prepare your development environment and deploy the nece
 
 This version of the workshop is tested to work with Python 3.11, AWS CDK 2.128.0, and AWS CLI 2.15.21. To have a smooth experience, ensure that you have the correct versions of the dependencies installed on your local machine.
 
-> __Note:__ It's recommended that participants attempt this workshop in a development container, or GitHub Codespaces, using the provided configuration. 
-> Follow these links to learn more about [Development Container](https://containers.dev/), [GitHub Codespaces](https://github.com/features/codespaces) and [Developing inside a container with Visual Studio Code](https://code.visualstudio.com/docs/devcontainers/containers).
->
-> __Skip this step if you are using GitHub Codespaces or a development container.__
+> __Skip this section if you are using GitHub Codespaces or a development container.__
 
 1. Ensure that you have the necessary dependencies installed on your local machine:
     - Docker
@@ -47,7 +44,7 @@ export AWS_SECRET_ACCESS_KEY=your_secret_key
 
 Deploy the `LLMOps-Workshop` Cloudformation Stack into your AWS account. This CloudFormation stack will deploy the necessary AWS resources for the workshop. These resources include a SageMaker Domain, an OpenSearch cluster, IAM roles, and more.
 
-> Reminder: We'll use `us-east-1` as the AWS region for this workshop. Make sure you have set the correct region in the AWS Management Console or in your AWS CLI configuration.
+> Reminder: We will use `us-east-1` as the AWS region for this workshop. Make sure you have set the correct region in the AWS Management Console or in your terminal.
 
 Click below link to launch the `LLMOps-Workshop` CloudFormation stack into the corresponding AWS Region.
 
@@ -71,9 +68,9 @@ aws cloudformation create-stack --stack-name LLMOps-Workshop --capabilities CAPA
 
 > The deployment will take about 20 minutes to complete. You can monitor the progress under the `Events` tab within your CloudFormation Stack.
 
-Once the status changes to `CREATE_COMPLETE`, you'll know that the stack has been successfully launched.
+Once the status changes to `CREATE_COMPLETE`, the stack has been launched successfully.
 
 
 # Next steps
 
-[Click here to proceed to the next chapter](/part-01/10-introduction-to-the-demo-application.md)
+Navigate to [Deploy GenAI applications to AWS](/part-01/) to start part 1 of the workshop.

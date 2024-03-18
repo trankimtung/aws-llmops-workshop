@@ -45,7 +45,7 @@ export AWS_REGION=us-east-1
 cdk bootstrap aws://$AWS_ACCOUNT_ID/$AWS_REGION --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess
 ```
 
-> Note: CDK bootstrapping should take approximately 2 minutes to complete. You only need to perform this step once per AWS account and region.
+> CDK bootstrapping should take approximately 2 minutes to complete. You only need to perform this step once per AWS account and region.
 
 With the AWS environment bootstrapped, you're now ready to deploy the demo application.
 
@@ -83,9 +83,9 @@ When the deployment completes, your output should look like this:
 
 Follow the URL of `WebAppUrl` output to access the demo Generative AI application.
 
-## Delete the test stack
+## Delete the manually created stack
 
-Now that you've confirmed the infrastructure and the demo Generative AI application are functional, you can delete the test stack.
+Now that you've confirmed the infrastructure and the demo Generative AI application are functional, you can delete the stack that you just manually created.
 
 In your terminal, run:
 
@@ -95,4 +95,4 @@ cdk destroy
 
 # Next steps
 
-[Click here to proceed to the next chapter](/part-01/40-building-a-cicd-pipeline.md)
+Navigate to [Building a CI/CD pipeline](/part-01/50-building-a-cicd-pipeline.md) to continue the workshop.

@@ -1,8 +1,8 @@
 # Writing Infrastructure as Code with AWS Cloud Development Kit
 
-In this section, you will create the backend infrastructure for the demo Generative AI application. You will not interact with the AWS Management Console to create the infrastructure. Instead, you will use the AWS Cloud Development Kit (CDK) to define the infrastructure as code. 
+In this chapter, you will create the infrastructure for the demo Generative AI application. You will not interact with the AWS Management Console to configure the services. Instead, you will use the AWS Cloud Development Kit (CDK) to define the infrastructure as code. 
 
-The infrastructure includes the following components: 
+The infrastructure for the demo application includes the following components: 
 - A Virtual Private Cloud (VPC) to host the ECS Fargate Cluster
 - Amazon API Gateways to host the Text and Image APIs
 - AWS Lambda functions to handle the API requests
@@ -160,4 +160,4 @@ Lastly, you'll save the DNS URL of the web application as a CloudFormation Outpu
 
 # Next steps
 
-[Click here to proceed to the next chapter](/part-01/30-deploying-to-aws.md)
+Navigate to [Deploying to AWS](/part-01/40-deploying-to-aws.md) to start deploying the infrastructure to AWS.

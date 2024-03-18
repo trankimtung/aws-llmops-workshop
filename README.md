@@ -8,16 +8,14 @@ This workshop will give you hands-on experience operationalizing Generative AI a
 
 This workshop can be completed in 6-8 hours, either self-paced or instructor-led, depending on the participant's familiarity with AWS, DevOps and Generative AI concepts. It is divided into two parts:
 - Part 1: Deploy Generative AI applications to AWS
-    - Introduction to the demo application
     - Writing infrastructure as code (IaC) with AWS CDK
-    - Deploying demo application to AWS
-    - Building a CICD pipeline with AWS CodePipeline
+    - Deploying the demo application to AWS
+    - Building a CI/CD pipeline with AWS CodePipeline
 
 - Part 2: Evolving Generative AI applications
     - Introduction to Amazon Bedrock
     - Implementing continuous fine-tuning
     - Implementing retrieval augmented generation (RAG)
-
 
 # Pre-requisites
 
@@ -29,9 +27,9 @@ This workshop can be completed in 6-8 hours, either self-paced or instructor-led
 - Docker installed on your local machine.
 - Basic understanding of the Python programming language.
 
-> __Note:__ It's recommended that participants attempt this workshop in a development container, or GitHub Codespaces, using the provided configuration. 
-> 
-> Follow these links to learn more about [Development Container](https://containers.dev/), [GitHub Codespaces](https://github.com/features/codespaces) and [Developing inside a container with Visual Studio Code](https://code.visualstudio.com/docs/devcontainers/containers).
+> It's recommended that you attempt this workshop in a [development container](https://containers.dev/), or [GitHub Codespaces](https://github.com/features/codespaces), using the provided configuration. By doing so, you avoid the hassle of setting up your local development environment and ensure that all the necessary tools and dependencies are readily available.  
+> Follow this guide to [start using GitHub Codespaces](https://docs.github.com/en/codespaces/getting-started/quickstart).
+> Or check out how to [Develop inside a container with Visual Studio Code](https://code.visualstudio.com/docs/devcontainers/containers).
 
 # Cost
 
