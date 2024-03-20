@@ -1,6 +1,6 @@
 # Operationalize Generative AI applications on AWS
 
-With the rising popularity of Generative Artificial Intelligence (GenAI), organizations are experimenting with Large Language Models (LLMs) and observe the immediate benefit they provide to their business. Thus, LLMs become a part of an organization technology stack. The need to integrate these models lifecycle into the software development lifecycle (SDLC), establishing best practices to optimize speed, cost, and quality, becomes a priority. 
+With the rising popularity of Generative Artificial Intelligence (GenAI), organizations are experimenting with Large Language Models (LLMs) and observe the immediate benefit they provide to their business. Thus, LLMs become a part of an organization technology stack. The need to integrate these models' lifecycle into the software development lifecycle (SDLC), establishing best practices to optimize speed, cost, and quality, becomes a priority. 
 
 This workshop will give you hands-on experience operationalizing Generative AI applications on AWS.
 
