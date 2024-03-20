@@ -1,6 +1,6 @@
 # Before you begin
 
-To ensure that you have access to all the necessary AWS resources and services to complete this workshop, follow the steps below.
+To ensure that you have access to all the necessary tools and AWS resources to complete this workshop, follow the steps below.
 
 > We will use `us-east-1` as the AWS region for this workshop.   
 > Make sure you have set the correct region in the AWS Management Console or in your terminal.
@@ -8,23 +8,21 @@ To ensure that you have access to all the necessary AWS resources and services t
 # Request access to Amazon Bedrock foundation models
 
 1. Open the [AWS Management Console](https://console.aws.amazon.com/), search for `Amazon Bedrock`. Using the left-hand navigation panel, scroll down to select `Model Access`.
-
 2. In the `Model access` panel, click the `Manage model access` button, in the top right-hand corner.
-
 3. Select the check-box for __Anthropic__, and click the `Submit use case details` button. Fill out the use case form.
-
 4. Click the `Submit` button.
-
-> The base model access approval process for Stability AI and Anthropic should take approximately 10 minutes to complete.
-
 5. Check the boxes for these models:
    - `Claude Instant`
    - `Claude Sonnet`
    - `SDXL 1.0`
    - `Titan Embeddings G1 - Text`
+6. Click the `Save changes` button to submit the access request.
 
-6. Click the `Save changes` button to submit the license approval process.
+> The approval process should take approximately 5 minutes to complete. You will receive email notifications once the request is approved.
 
+After the access is granted, you will have access to the foundation models. Your `Model access` panel should look like this:
+
+![](./img/bedrock-model-access.png)
 
 # Request service quota increase for AWS CodeBuild
 
