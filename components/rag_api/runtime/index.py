@@ -180,7 +180,7 @@ def get_prediction(question: str) -> str:
 
     logger.info(f"Bedrock model Id: {TEXT_MODEL_ID}")
 
-    if TEXT_MODEL_ID == "anthropic.claude-3-sonnet-20240229-v1:0" or TEXT_MODEL_ID == "anthropic.claude-instant-v1":
+    if TEXT_MODEL_ID == "anthropic.claude-3-sonnet-20240229-v1:0" or TEXT_MODEL_ID == "anthropic.claude-3-haiku-20240307-v1:0" or TEXT_MODEL_ID == "anthropic.claude-instant-v1":
         answer = invoke_anthropic_model(question=question, context=context)
     else:
         logger.info(f"Model is not supported: {TEXT_MODEL_ID}")

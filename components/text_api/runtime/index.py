@@ -73,7 +73,7 @@ def validate_inputs(body: Dict):
 def get_prediction(question: str) -> str:
     logger.info(f"Bedrock model Id: {TEXT_MODEL_ID}")
     logger.info(f"Sending prompt to Bedrock (RAG disabled) ... ")
-    if TEXT_MODEL_ID == "anthropic.claude-3-sonnet-20240229-v1:0" or TEXT_MODEL_ID == "anthropic.claude-instant-v1":
+    if TEXT_MODEL_ID == "anthropic.claude-3-sonnet-20240229-v1:0" or TEXT_MODEL_ID == "anthropic.claude-3-haiku-20240307-v1:0" or TEXT_MODEL_ID == "anthropic.claude-instant-v1":
         response = bedrock_client.invoke_model(
             body=json.dumps(
                 {
