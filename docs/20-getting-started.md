@@ -40,7 +40,7 @@ export AWS_ACCESS_KEY_ID=your_access_key
 export AWS_SECRET_ACCESS_KEY=your_secret_key
 ```
 
-### Deploy necessary AWS resouces
+# Deploy necessary AWS resources
 
 Deploy the `LLMOps-Workshop` Cloudformation Stack into your AWS account. This CloudFormation stack will deploy the necessary AWS resources for the workshop. These resources include a SageMaker Domain, an OpenSearch cluster, IAM roles, and more.
 
@@ -50,7 +50,7 @@ Click below link to launch the `LLMOps-Workshop` CloudFormation stack into the c
 
 Region|Launch URL
 :--|:--
-us-east-1|[Launch](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=LLMOps-Workshop&templateURL=https://raw.githubusercontent.com/trankimtung/aws-llmops-workshop/main/getting-started.yml)
+us-east-1|[Launch](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=LLMOps-Workshop&templateURL=https://workshop-us-east-1-058264270246.s3.amazonaws.com/aws-llmops-workshop/getting-started.yml)
 
 Specify an unique stack name, or stick with the default option of `LLMOps-Workshop`. Keep all other settings in the `Specify stack details` section at their default values.
 
