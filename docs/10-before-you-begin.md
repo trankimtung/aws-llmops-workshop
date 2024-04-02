@@ -51,6 +51,33 @@ aws service-quotas request-service-quota-increase --service-code codebuild --quo
 aws service-quotas request-service-quota-increase --service-code codebuild --quota-code L-2DC20C30 --desired-value 5
 ```
 
+# Request service quota increase for AWS SageMaker
+
+For new AWS accounts, the default service quotas for AWS SageMaker may not be sufficient to run this workshop.
+
+Follow the steps below in AWS Console to request a service quota increase for AWS SageMaker. If your account already has a sufficient service quota (more than 1), you can skip this section.
+
+1. Open the [AWS Management Console](https://console.aws.amazon.com/).
+2. In the search bar, type `Service Quotas` and select the service.
+3. In the left-hand navigation pane, select `AWS services`.
+4. In the `Service Quotas` dashboard, search and select `AWS SageMaker` from the list of services.
+5. In the `AWS SageMaker` dashboard, search and select `ml.m5.xlarge for processing job usage`.
+6. Click the `Request increase at account level` button.
+7. Set the `Increase quota value` to `1`.
+8. Review the request and click the `Request` button.
+9. Repeat steps 5-8 for `ml.m5.xlarge for training job usage`.
+
+
+Alternatively, you can execute the following commands:
+
+```shell
+# ml.m5.xlarge for processing job usage
+aws service-quotas request-service-quota-increase --service-code sagemaker --quota-code L-0307F515 --desired-value 1
+
+# ml.m5.xlarge for training job usage
+aws service-quotas request-service-quota-increase --service-code sagemaker --quota-code L-CCE2AFA6 --desired-value 1
+```
+
 # Get familiar with GitHub Codespaces
 
 It's recommended that you attempt this workshop in a [development container](https://containers.dev/), or [GitHub Codespaces](https://github.com/features/codespaces), using the provided configuration. By doing so, you avoid the hassle of setting up your local development environment and ensure that all the necessary tools and dependencies are readily available.  
