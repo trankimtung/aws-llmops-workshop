@@ -18,7 +18,10 @@ Now you will clean up the resources created in this workshop.
    - `LLMOps-Workshop-Toolchain`
    - `LLMOps-Workshop` (getting started stack, the name may be different if you modified it at the beginning of the workshop)
 
-> Note: Deletion of all stacks will take between 10-20 minutes to complete.
+Deletion of all stacks will take between 10-20 minutes to complete.
+
+> Do not delete the `CDKToolkit` stack. This stack is created by the AWS CDK and is used by the CDK to manage resources. Deleting this stack will prevent you from deleting other stacks in the future. 
+> You may only delete the `CDKToolkit` stack after you have deleted all other stacks created in the workshop.
   
 3. Delete the fine-tuned Bedrock model.
 
